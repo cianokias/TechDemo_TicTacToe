@@ -68,11 +68,9 @@ namespace TicTacToe
         public void SetInteractable(bool interactable)
         {
             _isInteractable = interactable;
-            
-            if (!_isInteractable && !_isPartOfWinningLine)
-            {
-                backgroundRenderer.color = disabledColor;
-            }
+
+            if (_isPartOfWinningLine) return;
+            backgroundRenderer.color = _isInteractable ? normalColor : disabledColor;
         }
         
         public void SetAsWinningCell()

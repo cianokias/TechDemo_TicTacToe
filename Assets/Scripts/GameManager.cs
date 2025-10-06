@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace TicTacToe
@@ -9,6 +10,8 @@ namespace TicTacToe
         
         [Header("Game Settings")]
         [SerializeField] private GameModeType gameMode = GameModeType.Standard;
+        [SerializeField] private bool vsAI = true;
+        [SerializeField] private bool playerGoesFirst = true;
         
         [Header("Board Settings")]
         [SerializeField] private GameObject cellPrefab;
@@ -19,6 +22,12 @@ namespace TicTacToe
         
         // Game state
         private bool _isGameOver = false;
+        
+        // AI
+        private IAIStrategy _aiStrategy;
+        private bool _isProcessingMove = false;
+        private int _humanPlayer;
+        private int _aiPlayer;
         
         void Awake()
         {
@@ -41,7 +50,15 @@ namespace TicTacToe
             // 3. Initialize BoardView
             _boardView.Initialize(_currentGame, cellPrefab);
             
-            // 4. Start new game
+            // 4. Initialize AI if needed
+            if (vsAI)
+            {
+                _aiStrategy = new RandomAI();
+                _humanPlayer = playerGoesFirst ? 1 : 2;
+                _aiPlayer = playerGoesFirst ? 2 : 1;
+            }
+            
+            // 5. Start new game
             StartNewGame();
         }
                 
@@ -113,12 +130,18 @@ namespace TicTacToe
             
             // update ui
             UpdateDisplay();
+            
+            // If AI goes first, make AI move
+            if (vsAI && !playerGoesFirst)
+            {
+                StartCoroutine(ProcessAITurn());
+            }
         }
         
         // Handle Player Input (from board view)
         public void OnPlayerInput(MoveData move)
         {
-            if (_isGameOver)
+            if (_isGameOver || _isProcessingMove)
                 return;
             
             // Mark the current player
@@ -139,6 +162,12 @@ namespace TicTacToe
                 else
                 {
                     UpdateDisplay();
+                    
+                    // If playing vs AI, trigger AI turn
+                    if (vsAI)
+                    {
+                        StartCoroutine(ProcessAITurn());
+                    }
                 }
             }
             else
@@ -146,6 +175,40 @@ namespace TicTacToe
                 // illegal move
                 Debug.Log($"Invalid move at ({move.X}, {move.Y})");
             }
+        }
+        
+        IEnumerator ProcessAITurn()
+        {
+            _isProcessingMove = true;
+            _boardView.SetInteractable(false);
+    
+            Debug.Log("AI is thinking...");
+            yield return new WaitForSeconds(_aiStrategy.ThinkingTime);
+            
+            MoveData aiMove = _aiStrategy.GetBestMove(_currentGame);
+    
+            if (aiMove != null)
+            {
+                int currentPlayer = _currentGame.CurrentPlayer;
+        
+                if (_currentGame.MakeMove(aiMove))
+                {
+                    PlayerMark mark = currentPlayer == 1 ? PlayerMark.X : PlayerMark.O;
+                    _boardView.UpdateCell(aiMove.X, aiMove.Y, mark);
+            
+                    if (_currentGame.CurrentGameState != GameState.InProgress)
+                    {
+                        HandleGameOver();
+                    }
+                    else
+                    {
+                        UpdateDisplay();
+                        _boardView.SetInteractable(true);
+                    }
+                }
+            }
+    
+            _isProcessingMove = false;
         }
         
         private void HandleGameOver()
@@ -184,8 +247,18 @@ namespace TicTacToe
         {
             if (_currentGame.CurrentGameState == GameState.InProgress)
             {
-                string currentPlayerText = _currentGame.CurrentPlayer == 1 ? 
-                    "Player 1 (X)" : "Player 2 (O)";
+                string currentPlayerText;
+                if (vsAI)
+                {
+                    bool isPlayerTurn = _currentGame.CurrentPlayer == _humanPlayer;
+                    string mark = _currentGame.CurrentPlayer == 1 ? "X" : "O";
+                    currentPlayerText = isPlayerTurn ? $"Your ({mark})" : $"AI's ({mark})";
+                }
+                else
+                {
+                    currentPlayerText = _currentGame.CurrentPlayer == 1 ? 
+                        "Player 1 (X)" : "Player 2 (O)";
+                }
                 string message = $"{currentPlayerText}'s Turn";
                 Debug.Log(message);
             }

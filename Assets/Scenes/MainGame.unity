@@ -152,6 +152,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameMode: 0
+  vsAI: 1
+  playerGoesFirst: 1
   cellPrefab: {fileID: 4116007314127376291, guid: 868d86eef686eec4c8c3dcc5f2b4407f, type: 3}
 --- !u!4 &388054276
 Transform:
