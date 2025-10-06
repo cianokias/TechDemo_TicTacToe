@@ -2,7 +2,7 @@ namespace TicTacToe
 {
     public interface IBoardView
     {
-        void Initialize(IGameMode gameMode);
+        void Initialize(IGameMode gameMode, UnityEngine.GameObject cellPrefab);
         void OnCellClicked(int x, int y);
         void UpdateCell(int x, int y, PlayerMark mark);
         void HighlightWinningLine(System.Collections.Generic.List<(int, int)> winningCells);

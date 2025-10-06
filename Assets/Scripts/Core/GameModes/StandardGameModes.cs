@@ -5,7 +5,7 @@ using System.Linq;
 namespace TicTacToe
 {
     /// Standard Tic-Tac-Toe Game Mode
-    public class Standard : IGameMode
+    public class StandardGameModes : IGameMode
     {
         private const int BoardSize = 3;
         
@@ -16,7 +16,7 @@ namespace TicTacToe
         private int _moveCount;
 
         // Constructor
-        public Standard()
+        public StandardGameModes()
         {
             _board = new PlayerMark[BoardSize, BoardSize];
             _currentPlayerMark = PlayerMark.X;

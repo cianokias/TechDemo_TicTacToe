@@ -19,4 +19,9 @@ namespace TicTacToe
         X = 1,         // Player1 (X)
         O = 2          // Player2 (O)
     }
+    
+    public enum GameModeType
+    {
+        Standard
+    }
 }
