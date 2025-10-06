@@ -24,7 +24,7 @@ namespace TicTacToe
         }
 
         // IGameMode
-        public string GameName => "Tic-Tac-Toe";
+        public string GameName => "Tic-Tac-Toe\n(Standard)";
 
         public GameState CurrentGameState => _gameState;
 

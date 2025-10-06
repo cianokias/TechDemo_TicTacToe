@@ -1,5 +1,7 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace TicTacToe
 {
@@ -16,6 +18,13 @@ namespace TicTacToe
         [Header("Board Settings")]
         [SerializeField] private GameObject cellPrefab;
         
+        [Header("UI Elements")]
+        [SerializeField] private TMP_Text infoText;
+        [SerializeField] private TMP_Text gameModeText;
+        [SerializeField] private TMP_Text aiText;
+        [SerializeField] private TMP_Text player1Text;
+        [SerializeField] private TMP_Text player2Text;
+        
         // Core components
         private IGameMode _currentGame;
         private IBoardView _boardView;
@@ -27,7 +36,6 @@ namespace TicTacToe
         private IAIStrategy _aiStrategy;
         private bool _isProcessingMove = false;
         private int _humanPlayer;
-        private int _aiPlayer;
         
         void Awake()
         {
@@ -55,10 +63,11 @@ namespace TicTacToe
             {
                 _aiStrategy = new RandomAI();
                 _humanPlayer = playerGoesFirst ? 1 : 2;
-                _aiPlayer = playerGoesFirst ? 2 : 1;
             }
+            // 5. Initialize UI
+            InitDisplay();
             
-            // 5. Start new game
+            // 6. Start new game
             StartNewGame();
         }
                 
@@ -182,7 +191,6 @@ namespace TicTacToe
             _isProcessingMove = true;
             _boardView.SetInteractable(false);
     
-            Debug.Log("AI is thinking...");
             yield return new WaitForSeconds(_aiStrategy.ThinkingTime);
             
             MoveData aiMove = _aiStrategy.GetBestMove(_currentGame);
@@ -228,19 +236,39 @@ namespace TicTacToe
             }
             
             // show result
-            string message = GetGameOverMessage(result.State);
-            Debug.Log($"Game Over: {message}");
+            infoText.text = GetGameOverMessage(result.State);
         }
         
-        private string GetGameOverMessage(GameState state)
+        // For UI
+        public void RestartGame()
         {
-            return state switch
+            StartNewGame();
+        }
+
+        public void ReturnToMenu()
+        {
+            SceneManager.LoadScene("Menu");
+        }
+
+        private void InitDisplay()
+        {
+            infoText.text = "";
+            gameModeText.text = _currentGame.GameName;
+
+            if (vsAI)
             {
-                GameState.Player1Win => "Player 1 (X) Wins!",
-                GameState.Player2Win => "Player 2 (O) Wins!",
-                GameState.Draw => "It's a Draw!",
-                _ => "Game Over"
-            };
+                aiText.text = _aiStrategy.DifficultyName;
+                player1Text.text = playerGoesFirst ?
+                    "Player 1 (X)" : "Player 1 (O)";
+                player2Text.text = playerGoesFirst ?
+                    "AI (O)" : "AI (X)";
+            }
+            else
+            {
+                aiText.gameObject.SetActive(false);
+                player1Text.text = "Player 1 (X)";
+                player2Text.text = "Player 2 (O)";
+            }
         }
         
         private void UpdateDisplay()
@@ -259,25 +287,30 @@ namespace TicTacToe
                     currentPlayerText = _currentGame.CurrentPlayer == 1 ? 
                         "Player 1 (X)" : "Player 2 (O)";
                 }
-                string message = $"{currentPlayerText}'s Turn";
-                Debug.Log(message);
+                infoText.text = $"{currentPlayerText}'s Turn";
             }
         }
         
-        // For UI
-        public void RestartGame()
+        private string GetGameOverMessage(GameState state)
         {
-            StartNewGame();
-        }
-        
-        public IGameMode GetCurrentGame()
-        {
-            return _currentGame;
-        }
-        
-        public bool IsGameOver()
-        {
-            return _isGameOver;
+            if (vsAI)
+            {
+                return state switch
+                {
+                    GameState.Player1Win => _humanPlayer == 1 ? "You Win!" : "AI Wins!",
+                    GameState.Player2Win => _humanPlayer == 2 ? "You Win!" : "AI Wins!",
+                    GameState.Draw => "It's a Draw!",
+                    _ => "Game Over"
+                };
+            }
+            
+            return state switch
+            {
+                GameState.Player1Win => "Player 1 (X) Wins!",
+                GameState.Player2Win => "Player 2 (O) Wins!",
+                GameState.Draw => "It's a Draw!",
+                _ => "Game Over"
+            };
         }
         
         void OnDestroy()
