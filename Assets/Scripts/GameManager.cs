@@ -11,9 +11,13 @@ namespace TicTacToe
         public static GameManager Instance { get; private set; }
         
         [Header("Game Settings")]
-        [SerializeField] private GameModeType gameMode = GameModeType.Standard;
-        [SerializeField] private bool vsAI = true;
-        [SerializeField] private bool playerGoesFirst = true;
+        [SerializeField, TextArea] private string gameSettingsTips = 
+            "Game settings are controlled by GameSettings static class" +
+            " and configured through Main Menu scene.";
+        private GameModeType _gameMode = GameModeType.Standard;
+        private bool _vsAI = true;
+        private AIType _aiType = AIType.Random;
+        private bool _playerGoesFirst = true;
         
         [Header("Board Settings")]
         [SerializeField] private GameObject cellPrefab;
@@ -44,25 +48,37 @@ namespace TicTacToe
         
         void Start()
         {
+            LoadGameSettings();
             InitializeGame();
+        }
+        
+        private void LoadGameSettings()
+        {
+            _gameMode = GameSettings.GameMode;
+            _vsAI = GameSettings.VsAI;
+            _playerGoesFirst = GameSettings.PlayerGoesFirst;
+            _aiType = GameSettings.AIType;
+    
+            Debug.Log(gameSettingsTips);
+            Debug.Log($"Game Settings Loaded - Mode: {_gameMode}, VS AI: {_vsAI}, AI Type: {GameSettings.AIType}, Player First: {_playerGoesFirst}");
         }
         
         private void InitializeGame()
         {
             // 1. Create GameMode
-            _currentGame = CreateGameMode(gameMode);
+            _currentGame = CreateGameMode(_gameMode);
             
             // 2. Create corresponding BoardView
-            _boardView = CreateBoardView(gameMode);
+            _boardView = CreateBoardView(_gameMode);
             
             // 3. Initialize BoardView
             _boardView.Initialize(_currentGame, cellPrefab);
             
             // 4. Initialize AI if needed
-            if (vsAI)
+            if (_vsAI)
             {
-                _aiStrategy = new RandomAI();
-                _humanPlayer = playerGoesFirst ? 1 : 2;
+                _aiStrategy = CreateAIStrategy(_aiType);
+                _humanPlayer = _playerGoesFirst ? 1 : 2;
             }
             // 5. Initialize UI
             InitDisplay();
@@ -108,7 +124,7 @@ namespace TicTacToe
             };
 
             // Add BoardView component based on game mode
-            IBoardView newBoardView = null;
+            IBoardView newBoardView;
             switch (type)
             {
                 case GameModeType.Standard:
@@ -124,6 +140,21 @@ namespace TicTacToe
             }
             
             return newBoardView;
+        }
+        
+        private IAIStrategy CreateAIStrategy(AIType type)
+        {
+            switch (type)
+            {
+                case AIType.Random:
+                    return new RandomAI();
+                
+                // more case in the future
+                
+                default:
+                    Debug.LogWarning($"AI type {type} not implemented, using RandomAI");
+                    return new RandomAI();
+            }
         }
 
         public void StartNewGame()
@@ -141,7 +172,7 @@ namespace TicTacToe
             UpdateDisplay();
             
             // If AI goes first, make AI move
-            if (vsAI && !playerGoesFirst)
+            if (_vsAI && !_playerGoesFirst)
             {
                 StartCoroutine(ProcessAITurn());
             }
@@ -173,7 +204,7 @@ namespace TicTacToe
                     UpdateDisplay();
                     
                     // If playing vs AI, trigger AI turn
-                    if (vsAI)
+                    if (_vsAI)
                     {
                         StartCoroutine(ProcessAITurn());
                     }
@@ -255,12 +286,12 @@ namespace TicTacToe
             infoText.text = "";
             gameModeText.text = _currentGame.GameName;
 
-            if (vsAI)
+            if (_vsAI)
             {
                 aiText.text = _aiStrategy.DifficultyName;
-                player1Text.text = playerGoesFirst ?
+                player1Text.text = _playerGoesFirst ?
                     "Player 1 (X)" : "Player 1 (O)";
-                player2Text.text = playerGoesFirst ?
+                player2Text.text = _playerGoesFirst ?
                     "AI (O)" : "AI (X)";
             }
             else
@@ -276,7 +307,7 @@ namespace TicTacToe
             if (_currentGame.CurrentGameState == GameState.InProgress)
             {
                 string currentPlayerText;
-                if (vsAI)
+                if (_vsAI)
                 {
                     bool isPlayerTurn = _currentGame.CurrentPlayer == _humanPlayer;
                     string mark = _currentGame.CurrentPlayer == 1 ? "X" : "O";
@@ -293,7 +324,7 @@ namespace TicTacToe
         
         private string GetGameOverMessage(GameState state)
         {
-            if (vsAI)
+            if (_vsAI)
             {
                 return state switch
                 {

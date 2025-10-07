@@ -151,9 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 602ae196b0eac2c4bbb2dc2151a6f39d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameMode: 0
-  vsAI: 1
-  playerGoesFirst: 1
+  gameSettingsTips: Game settings are controlled by GameSettings static class and
+    configured through Main Menu scene.
   cellPrefab: {fileID: 4116007314127376291, guid: 868d86eef686eec4c8c3dcc5f2b4407f, type: 3}
   infoText: {fileID: 1369355854}
   gameModeText: {fileID: 592877820}

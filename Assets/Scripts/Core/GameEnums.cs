@@ -24,4 +24,9 @@ namespace TicTacToe
     {
         Standard
     }
+    
+    public enum AIType
+    {
+        Random,
+    }
 }
