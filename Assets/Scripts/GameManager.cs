@@ -92,13 +92,16 @@ namespace TicTacToe
             switch (type)
             {
                 case GameModeType.Standard:
-                    return new StandardGameModes();
+                    return new StandardGameMode();
+                
+                case GameModeType.Gravity:
+                    return new GravityGameMode();
                 
                 // more case in the future
                 
                 default:
                     Debug.LogWarning($"Game mode {type} not implemented, using Standard");
-                    return new StandardGameModes();
+                    return new StandardGameMode();
             }
         }
         
@@ -128,6 +131,7 @@ namespace TicTacToe
             switch (type)
             {
                 case GameModeType.Standard:
+                case GameModeType.Gravity:
                     newBoardView = boardViewObj.AddComponent<StandardBoardView>();
                     break;
                 
@@ -190,11 +194,12 @@ namespace TicTacToe
             int currentPlayer = _currentGame.CurrentPlayer;
             
             // Try to make move
-            if (_currentGame.MakeMove(move))
+            MoveData actualMove = _currentGame.MakeMove(move);
+            if (actualMove != null)
             {
                 // Update view
                 PlayerMark mark = currentPlayer == 1 ? PlayerMark.X : PlayerMark.O;
-                _boardView.UpdateCell(move.X, move.Y, mark);
+                _boardView.UpdateCell(actualMove.X, actualMove.Y, mark);
                 
                 // Check if game is over
                 if (_currentGame.CurrentGameState != GameState.InProgress)
@@ -227,15 +232,14 @@ namespace TicTacToe
             yield return new WaitForSeconds(_aiStrategy.ThinkingTime);
             
             MoveData aiMove = _aiStrategy.GetBestMove(_currentGame);
-    
             if (aiMove != null)
             {
                 int currentPlayer = _currentGame.CurrentPlayer;
-        
-                if (_currentGame.MakeMove(aiMove))
+                MoveData actualMove = _currentGame.MakeMove(aiMove);
+                if (actualMove != null)
                 {
                     PlayerMark mark = currentPlayer == 1 ? PlayerMark.X : PlayerMark.O;
-                    _boardView.UpdateCell(aiMove.X, aiMove.Y, mark);
+                    _boardView.UpdateCell(actualMove.X, actualMove.Y, mark);
             
                     if (_currentGame.CurrentGameState != GameState.InProgress)
                     {

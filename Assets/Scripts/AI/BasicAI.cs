@@ -56,7 +56,7 @@ namespace TicTacToe
                 IGameMode simulation = gameMode.Clone();
                 
                 // Try the move
-                if (simulation.MakeMove(move))
+                if (simulation.MakeMove(move) != null)
                 {
                     // Check if this move results in a win for current player
                     if ((currentPlayer == 1 && simulation.CurrentGameState == GameState.Player1Win) ||
@@ -94,7 +94,7 @@ namespace TicTacToe
                     if (sim.CurrentGameState == GameState.InProgress)
                     {
                         // Now it's opponent's turn, see if they can win with 'move'
-                        if (sim.IsValidMove(move) && sim.MakeMove(move))
+                        if (sim.IsValidMove(move) && sim.MakeMove(move) != null)
                         {
                             if ((opponent == 1 && sim.CurrentGameState == GameState.Player1Win) ||
                                 (opponent == 2 && sim.CurrentGameState == GameState.Player2Win))

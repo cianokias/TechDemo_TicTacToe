@@ -6,7 +6,7 @@ namespace TicTacToe
     public interface IGameMode
     {
         // Core Game Logic
-        bool MakeMove(MoveData move);
+        MoveData MakeMove(MoveData move);
         bool IsValidMove(MoveData move);
         List<MoveData> GetLegalMoves();
         void Reset();

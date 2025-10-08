@@ -5,30 +5,31 @@ using System.Linq;
 namespace TicTacToe
 {
     /// Standard Tic-Tac-Toe Game Mode
-    public class StandardGameModes : IGameMode
+    // Use StandardMove and StandardBoardView
+    public class StandardGameMode : IGameMode
     {
-        private const int BoardSize = 3;
+        protected const int BoardSize = 3;
         
-        private PlayerMark[,] _board;
-        private PlayerMark _currentPlayerMark;
-        private GameState _gameState;
+        protected PlayerMark[,] Board;
+        protected PlayerMark CurrentPlayerMark;
+        protected GameState GameState;
+        protected int MoveCount;
         private List<(int, int)> _winningLine;
-        private int _moveCount;
 
         // Constructor
-        public StandardGameModes()
+        public StandardGameMode()
         {
-            _board = new PlayerMark[BoardSize, BoardSize];
-            _currentPlayerMark = PlayerMark.X;
+            Board = new PlayerMark[BoardSize, BoardSize];
+            CurrentPlayerMark = PlayerMark.X;
             Reset();
         }
 
         // IGameMode
-        public string GameName => "Tic-Tac-Toe\n(Standard)";
+        public virtual string GameName => "Tic-Tac-Toe\n(Standard)";
 
-        public GameState CurrentGameState => _gameState;
+        public GameState CurrentGameState => GameState;
 
-        public int CurrentPlayer => _currentPlayerMark == PlayerMark.X ? 1 : 2;
+        public int CurrentPlayer => CurrentPlayerMark == PlayerMark.X ? 1 : 2;
 
         public Type GetMoveType() => typeof(StandardMove);
 
@@ -36,15 +37,15 @@ namespace TicTacToe
         
         public void Reset()
         {
-            _board = new PlayerMark[BoardSize, BoardSize];
+            Board = new PlayerMark[BoardSize, BoardSize];
 
-            _currentPlayerMark = PlayerMark.X;
-            _gameState = GameState.InProgress;
+            CurrentPlayerMark = PlayerMark.X;
+            GameState = GameState.InProgress;
             _winningLine = null;
-            _moveCount = 0;
+            MoveCount = 0;
         }
         
-        public bool MakeMove(MoveData move)
+        public virtual MoveData MakeMove(MoveData move)
         {
             // MoveData type check
             if (!(move is StandardMove standardMove))
@@ -55,35 +56,35 @@ namespace TicTacToe
             // Check if the move is valid
             if (!IsValidMove(standardMove))
             {
-                return false;
+                return null;
             }
             
             // Fill the board
-            _board[standardMove.X, standardMove.Y] = _currentPlayerMark;
-            _moveCount++;
+            Board[standardMove.X, standardMove.Y] = CurrentPlayerMark;
+            MoveCount++;
 
             // Check if the game is over
             if (CheckWin(standardMove.X, standardMove.Y)) // if win
             {
-                _gameState = _currentPlayerMark == PlayerMark.X ? GameState.Player1Win : GameState.Player2Win;
+                GameState = CurrentPlayerMark == PlayerMark.X ? GameState.Player1Win : GameState.Player2Win;
             }
             else if (CheckDraw()) // if draw
             {
-                _gameState = GameState.Draw;
+                GameState = GameState.Draw;
             }
             else
             {
                 // game is not over, switch player
-                _currentPlayerMark = _currentPlayerMark == PlayerMark.X ? PlayerMark.O : PlayerMark.X;
+                CurrentPlayerMark = CurrentPlayerMark == PlayerMark.X ? PlayerMark.O : PlayerMark.X;
             }
 
-            return true;
+            return move;
         }
         
-        public bool IsValidMove(MoveData move)
+        public virtual bool IsValidMove(MoveData move)
         {
             // Game is over, no valid move
-            if (_gameState != GameState.InProgress)
+            if (GameState != GameState.InProgress)
             {
                 return false;
             }
@@ -102,14 +103,14 @@ namespace TicTacToe
             }
 
             // if the position is empty, it's valid'
-            return _board[standardMove.X, standardMove.Y] == PlayerMark.Empty;
+            return Board[standardMove.X, standardMove.Y] == PlayerMark.Empty;
         }
         
-        public List<MoveData> GetLegalMoves()
+        public virtual List<MoveData> GetLegalMoves()
         {
             var moves = new List<MoveData>();
 
-            if (_gameState != GameState.InProgress)
+            if (GameState != GameState.InProgress)
             {
                 return moves;  // if game is over, no legal moves
             }
@@ -118,7 +119,7 @@ namespace TicTacToe
             {
                 for (int y = 0; y < BoardSize; y++)
                 {
-                    if (_board[x, y] == PlayerMark.Empty) // find all empty positions
+                    if (Board[x, y] == PlayerMark.Empty) // find all empty positions
                     {
                         moves.Add(new StandardMove(x, y));
                     }
@@ -130,18 +131,18 @@ namespace TicTacToe
         
         public object GetBoardState()
         {
-            return (int[,])_board.Clone();
+            return (int[,])Board.Clone();
         }
         
         public GameResult GetGameResult()
         {
-            return new GameResult(_gameState, _winningLine);
+            return new GameResult(GameState, _winningLine);
         }
 
         // Win Check Functions
-        private bool CheckWin(int lastX, int lastY)
+        protected bool CheckWin(int lastX, int lastY)
         {
-            var player = _board[lastX, lastY];
+            var player = Board[lastX, lastY];
             
             // same line
             if (CheckLine(0, lastY, 1, 0, player))
@@ -181,7 +182,7 @@ namespace TicTacToe
                 int x = startX + i * deltaX;
                 int y = startY + i * deltaY;
                 
-                if (_board[x, y] != playerMark)
+                if (Board[x, y] != playerMark)
                 {
                     return false;
                 }
@@ -189,17 +190,17 @@ namespace TicTacToe
             return true;
         }
         
-        private bool CheckDraw()
+        protected private bool CheckDraw()
         {
             // if all cells are filled, the game is over
-            return _moveCount >= BoardSize * BoardSize;
+            return MoveCount >= BoardSize * BoardSize;
         }
 
-        public IGameMode Clone()
+        public virtual IGameMode Clone()
         {
-            var clone = new StandardGameModes
+            var clone = new StandardGameMode
             {
-                _board = new PlayerMark[BoardSize, BoardSize]
+                Board = new PlayerMark[BoardSize, BoardSize]
             };
 
             // copying board
@@ -207,13 +208,13 @@ namespace TicTacToe
             {
                 for (int y = 0; y < BoardSize; y++)
                 {
-                    clone._board[x, y] = this._board[x, y];
+                    clone.Board[x, y] = this.Board[x, y];
                 }
             }
             
-            clone._currentPlayerMark = this._currentPlayerMark;
-            clone._gameState = this._gameState;
-            clone._moveCount = this._moveCount;
+            clone.CurrentPlayerMark = this.CurrentPlayerMark;
+            clone.GameState = this.GameState;
+            clone.MoveCount = this.MoveCount;
             
             return clone;
         }
@@ -223,14 +224,14 @@ namespace TicTacToe
         {
             var result = new System.Text.StringBuilder();
             result.AppendLine($"Game: {GameName}");
-            result.AppendLine($"State: {_gameState}, Current Player: {_currentPlayerMark}");
+            result.AppendLine($"State: {GameState}, Current Player: {CurrentPlayerMark}");
             result.AppendLine("Board:");
             
             for (int y = 0; y < BoardSize; y++)
             {
                 for (int x = 0; x < BoardSize; x++)
                 {
-                    char mark = _board[x, y] switch
+                    char mark = Board[x, y] switch
                     {
                         PlayerMark.X => 'X',
                         PlayerMark.O => 'O',

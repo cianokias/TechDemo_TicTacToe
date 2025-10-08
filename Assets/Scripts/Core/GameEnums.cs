@@ -22,7 +22,8 @@ namespace TicTacToe
     
     public enum GameModeType
     {
-        Standard
+        Standard,
+        Gravity
     }
     
     public enum AIType
