@@ -23,5 +23,8 @@ namespace TicTacToe
         string GameName { get; }
         Type GetMoveType();
         (int width, int height) GetBoardSize();
+        
+        // Clone for AI simulation
+        IGameMode Clone();
     }
 }

@@ -195,6 +195,29 @@ namespace TicTacToe
             return _moveCount >= BoardSize * BoardSize;
         }
 
+        public IGameMode Clone()
+        {
+            var clone = new StandardGameModes
+            {
+                _board = new PlayerMark[BoardSize, BoardSize]
+            };
+
+            // copying board
+            for (int x = 0; x < BoardSize; x++)
+            {
+                for (int y = 0; y < BoardSize; y++)
+                {
+                    clone._board[x, y] = this._board[x, y];
+                }
+            }
+            
+            clone._currentPlayerMark = this._currentPlayerMark;
+            clone._gameState = this._gameState;
+            clone._moveCount = this._moveCount;
+            
+            return clone;
+        }
+        
         // Debug
         public override string ToString()
         {

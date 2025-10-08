@@ -149,6 +149,8 @@ namespace TicTacToe
                 case AIType.Random:
                     return new RandomAI();
                 
+                case AIType.Basic:
+                    return new BasicAI();
                 // more case in the future
                 
                 default:
