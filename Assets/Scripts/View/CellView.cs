@@ -16,6 +16,7 @@ namespace TicTacToe
         [SerializeField] private Color normalColor = Color.white;
         [SerializeField] private Color hoverColor = new Color(0.85f, 0.85f, 0.85f, 1f);
         [SerializeField] private Color winColor = new Color(0.3f, 1f, 0.2f, 1f);
+        [SerializeField] private Color highlightColor = new Color(1f, 1f, 0.6f, 1f);
         [SerializeField] private Color disabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
         
         // Position in the board
@@ -26,6 +27,7 @@ namespace TicTacToe
         private bool _isOccupied = false;
         private bool _isInteractable = true;
         private bool _isPartOfWinningLine = false;
+        private bool _isLastAIMove = false;
         
         // Reference to the board
         private IBoardView _boardView;
@@ -68,9 +70,33 @@ namespace TicTacToe
         public void SetInteractable(bool interactable)
         {
             _isInteractable = interactable;
+            UpdateVisualState();
+        }
 
-            if (_isPartOfWinningLine) return;
-            backgroundRenderer.color = _isInteractable ? normalColor : disabledColor;
+        public void SetAsLastAIMove(bool isLast)
+        {
+            _isLastAIMove = isLast;
+            UpdateVisualState();
+        }
+        
+        void UpdateVisualState()
+        {
+            if (_isPartOfWinningLine)
+            {
+                backgroundRenderer.color = winColor;
+            }
+            else if (_isLastAIMove)
+            {
+                backgroundRenderer.color = highlightColor;
+            }
+            else if (!_isInteractable)
+            {
+                backgroundRenderer.color = disabledColor;
+            }
+            else
+            {
+                backgroundRenderer.color = normalColor;
+            }
         }
         
         public void SetAsWinningCell()
@@ -84,6 +110,7 @@ namespace TicTacToe
             _isOccupied = false;
             _isInteractable = true;
             _isPartOfWinningLine = false;
+            _isLastAIMove = false;
             spriteRenderer.sprite = null;
             backgroundRenderer.color = normalColor;
         }
@@ -98,7 +125,7 @@ namespace TicTacToe
         
         void OnMouseEnter()
         {
-            if (_isInteractable && !_isOccupied)
+            if (_isInteractable && !_isOccupied && !_isLastAIMove)
             {
                 backgroundRenderer.color = hoverColor;
             }
@@ -106,7 +133,7 @@ namespace TicTacToe
         
         void OnMouseExit()
         {
-            if (!_isPartOfWinningLine && _isInteractable)
+            if (!_isPartOfWinningLine && _isInteractable && !_isLastAIMove)
             {
                 backgroundRenderer.color = _isInteractable ? normalColor : disabledColor;
             }

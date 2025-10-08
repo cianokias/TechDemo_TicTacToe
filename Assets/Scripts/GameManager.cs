@@ -97,6 +97,9 @@ namespace TicTacToe
                 case GameModeType.Gravity:
                     return new GravityGameMode();
                 
+                case GameModeType.Ultimate:
+                    return new UltimateGameMode();
+                
                 // more case in the future
                 
                 default:
@@ -133,6 +136,10 @@ namespace TicTacToe
                 case GameModeType.Standard:
                 case GameModeType.Gravity:
                     newBoardView = boardViewObj.AddComponent<StandardBoardView>();
+                    break;
+                
+                case GameModeType.Ultimate:
+                    newBoardView = boardViewObj.AddComponent<UltimateBoardView>();
                     break;
                 
                 // more case in the future
@@ -240,6 +247,7 @@ namespace TicTacToe
                 {
                     PlayerMark mark = currentPlayer == 1 ? PlayerMark.X : PlayerMark.O;
                     _boardView.UpdateCell(actualMove.X, actualMove.Y, mark);
+                    _boardView.HighlightLastMove(actualMove.X, actualMove.Y);
             
                     if (_currentGame.CurrentGameState != GameState.InProgress)
                     {
@@ -350,16 +358,16 @@ namespace TicTacToe
             };
         }
         
+        public IBoardView GetBoardView()
+        {
+            return _boardView;
+        }
+        
         void OnDestroy()
         {
             if (Instance == this)
             {
                 Instance = null;
-            }
-            
-            if (_boardView != null)
-            {
-                _boardView.Cleanup();
             }
         }
     }

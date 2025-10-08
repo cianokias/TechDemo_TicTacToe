@@ -6,6 +6,7 @@ namespace TicTacToe
         void OnCellClicked(int x, int y);
         void UpdateCell(int x, int y, PlayerMark mark);
         void HighlightWinningLine(System.Collections.Generic.List<(int, int)> winningCells);
+        void HighlightLastMove(int x, int y);
         void SetInteractable(bool interactable);
         void Reset();
         void Cleanup();

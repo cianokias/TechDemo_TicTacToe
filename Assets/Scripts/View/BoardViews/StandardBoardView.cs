@@ -11,6 +11,7 @@ namespace TicTacToe
         
         private CellView[,] _cells;
         private GameObject _cellPrefab;
+        private (int x, int y) _lastAIMovePos = (-1, -1);
         
         public void Initialize(IGameMode gameMode, GameObject cellPrefab)
         {
@@ -88,6 +89,23 @@ namespace TicTacToe
                 {
                     _cells[x, y].SetAsWinningCell();
                 }
+            }
+        }
+        
+        public void HighlightLastMove(int x, int y)
+        {
+            if (_lastAIMovePos.x >= 0 && _lastAIMovePos.y >= 0)
+            {
+                if (IsValidPosition(_lastAIMovePos.x, _lastAIMovePos.y))
+                {
+                    _cells[_lastAIMovePos.x, _lastAIMovePos.y].SetAsLastAIMove(false);
+                }
+            }
+            
+            if (IsValidPosition(x, y))
+            {
+                _cells[x, y].SetAsLastAIMove(true);
+                _lastAIMovePos = (x, y);
             }
         }
         

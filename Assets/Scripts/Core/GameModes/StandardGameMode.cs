@@ -29,9 +29,11 @@ namespace TicTacToe
 
         public GameState CurrentGameState => GameState;
 
-        public int CurrentPlayer => CurrentPlayerMark == PlayerMark.X ? 1 : 2;
-
-        public Type GetMoveType() => typeof(StandardMove);
+        public int CurrentPlayer 
+        { 
+            get => CurrentPlayerMark == PlayerMark.X ? 1 : 2;
+            set => CurrentPlayerMark = value == 1 ? PlayerMark.X : PlayerMark.O;
+        }
 
         public (int width, int height) GetBoardSize() => (BoardSize, BoardSize);
         
@@ -127,11 +129,6 @@ namespace TicTacToe
             }
 
             return moves;
-        }
-        
-        public object GetBoardState()
-        {
-            return (int[,])Board.Clone();
         }
         
         public GameResult GetGameResult()

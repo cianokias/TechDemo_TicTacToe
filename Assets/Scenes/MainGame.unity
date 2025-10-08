@@ -414,7 +414,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 519420031}
-  padding: 1.5
+  padding: 40
   autoFitOnStart: 1
   smoothSpeed: 5
 --- !u!1 &592877818

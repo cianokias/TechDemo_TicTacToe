@@ -69,7 +69,7 @@ namespace TicTacToe
             }
             
             // Find board view
-            IBoardView boardView = FindObjectOfType<StandardBoardView>();
+            IBoardView boardView = GameManager.Instance?.GetBoardView();
             if (boardView == null)
             {
                 Debug.LogWarning("No board view found!");
@@ -111,7 +111,8 @@ namespace TicTacToe
         private void FitCameraToBounds(Bounds bounds)
         {
             // add padding
-            bounds.Expand(padding);
+            float relativePadding = Mathf.Max(bounds.size.x, bounds.size.y) * padding/100f;
+            bounds.Expand(relativePadding);
             
             // move camera to center
             Vector3 newPosition = bounds.center;

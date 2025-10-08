@@ -75,43 +75,21 @@ namespace TicTacToe
         {
             foreach (var move in legalMoves)
             {
-                // Find another legal move to make first (to switch turns)
-                MoveData otherMove = null;
-                foreach (var m in legalMoves)
+                IGameMode simulation = gameMode.Clone();
+        
+                // simulate the move
+                simulation.CurrentPlayer = opponent;
+        
+                if (simulation.MakeMove(move) != null)
                 {
-                    if (!m.Equals(move))  // Make sure it's a different position
+                    if ((opponent == 1 && simulation.CurrentGameState == GameState.Player1Win) ||
+                        (opponent == 2 && simulation.CurrentGameState == GameState.Player2Win))
                     {
-                        otherMove = m;
-                        break;
+                        return move;
                     }
-                }
-                
-                if (otherMove != null)
-                {
-                    IGameMode sim = gameMode.Clone();
-                    sim.MakeMove(otherMove); // Our turn, play elsewhere
-                    
-                    if (sim.CurrentGameState == GameState.InProgress)
-                    {
-                        // Now it's opponent's turn, see if they can win with 'move'
-                        if (sim.IsValidMove(move) && sim.MakeMove(move) != null)
-                        {
-                            if ((opponent == 1 && sim.CurrentGameState == GameState.Player1Win) ||
-                                (opponent == 2 && sim.CurrentGameState == GameState.Player2Win))
-                            {
-                                return move; // We should block this position
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // Special case: only one move left (move == the only legal move)
-                    // Just take it
-                    return move;
                 }
             }
-            
+    
             return null;
         }
     }
