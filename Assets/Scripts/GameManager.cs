@@ -162,6 +162,10 @@ namespace TicTacToe
                 
                 case AIType.Basic:
                     return new BasicAI();
+                
+                case AIType.MinMax:
+                    return new MinMaxAI();
+                
                 // more case in the future
                 
                 default:
