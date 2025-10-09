@@ -22,6 +22,14 @@ public class MenuController : MonoBehaviour
         ReadValuesFromSetting();
     }
     
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+    }
+
     private void PopulateDropdownFromEnum<T>(TMP_Dropdown dropdown) where T : Enum
     {
         dropdown.ClearOptions();
